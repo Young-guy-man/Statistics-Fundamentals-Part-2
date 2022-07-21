@@ -1,0 +1,55 @@
+"""Statistics Fundamentals Part 2
+Hypothesis Testing : Testing an Associaton
+Heart Disease Research Part 2
+Check the association between hear disease and chest pain or heart rate"""
+
+# import libraries
+import codecademylib3
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import ttest_ind, f_oneway, chi2_contingency
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+
+# Load data
+heart = pd.read_csv('heart_disease.csv')
+print(heart.head())
+
+# Boxplot between hear_disease and maximum hear rate acheived
+sns.boxplot(x = heart.heart_disease, y = heart.thalach)
+plt.show()
+
+thalach_hd = heart.thalach[heart.heart_disease == 'presence']
+thalach_no_hd = heart.thalach[heart.heart_disease == 'absence']
+
+mean_diff = np.mean(thalach_no_hd) - np.mean(thalach_hd)
+print('thalach mean Difference: ', mean_diff)
+
+# Hypothesis Test
+tstat, pval = ttest_ind(thalach_hd, thalach_no_hd)
+# Decide whether accept Null or alaternative
+print(pval)
+
+plt.clf()
+sns.boxplot(x = heart.cp, y = heart.thalach)
+plt.show()
+
+thalach_typical = heart.thalach[heart.cp == 'typical angina']
+thalach_asymptomatic = heart.thalach[heart.cp == 'asymptomatic']
+thalach_non_aginal_pain = heart.thalach[heart.cp == 'non-anginal pain']
+thalach_atypical_angina = heart.thalach[heart.cp == 'atypical angina']
+
+# Test associated between two variables, Used ANOVA
+Fstat, pval = f_oneway(thalach_typical, thalach_asymptomatic, thalach_non_aginal_pain, thalach_atypical_angina)
+print(pval)
+
+results = pairwise_tukeyhsd(endog = heart.thalach, groups = heart.cp)
+
+Xtab = pd.crosstab(heart.heart_disease, heart.cp)
+print(Xtab)
+
+# Investigating between two categorical variables, used Chi-square
+chi2, pval, dof, exp = chi2_contingency(Xtab)
+print(pval)
